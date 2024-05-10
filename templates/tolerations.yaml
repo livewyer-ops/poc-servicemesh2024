@@ -1,0 +1,250 @@
+# Values file, that provides tolerations for all Cilium components
+# Used in initialize.sh 
+tolerations:
+  - operator: Exists
+  - key: "type"
+    operator: "Equal"
+    value: "preinstalled-apps"
+    effect: "NoSchedule"
+  - key: "type"
+    operator: "Equal"
+    value: "test-applications"
+    effect: "NoSchedule"
+  - key: "type"
+    operator: "Equal"
+    value: "load-testing"
+    effect: "NoSchedule"
+  - key: "type"
+    operator: "Equal"
+    value: "service-mesh"
+    effect: "NoSchedule"
+certgen:
+  tolerations:
+    - key: "type"
+      operator: "Equal"
+      value: "preinstalled-apps"
+      effect: "NoSchedule"
+    - key: "type"
+      operator: "Equal"
+      value: "test-applications"
+      effect: "NoSchedule"
+    - key: "type"
+      operator: "Equal"
+      value: "load-testing"
+      effect: "NoSchedule"
+    - key: "type"
+      operator: "Equal"
+      value: "service-mesh"
+      effect: "NoSchedule"
+hubble:
+  relay:
+    tolerations:
+      - key: "type"
+        operator: "Equal"
+        value: "preinstalled-apps"
+        effect: "NoSchedule"
+      - key: "type"
+        operator: "Equal"
+        value: "test-applications"
+        effect: "NoSchedule"
+      - key: "type"
+        operator: "Equal"
+        value: "load-testing"
+        effect: "NoSchedule"
+      - key: "type"
+        operator: "Equal"
+        value: "service-mesh"
+        effect: "NoSchedule"
+  ui:
+    tolerations:
+      - key: "type"
+        operator: "Equal"
+        value: "preinstalled-apps"
+        effect: "NoSchedule"
+      - key: "type"
+        operator: "Equal"
+        value: "test-applications"
+        effect: "NoSchedule"
+      - key: "type"
+        operator: "Equal"
+        value: "load-testing"
+        effect: "NoSchedule"
+      - key: "type"
+        operator: "Equal"
+        value: "service-mesh"
+        effect: "NoSchedule"
+envoy:
+  tolerations:
+    - operator: Exists
+    - key: "type"
+      operator: "Equal"
+      value: "preinstalled-apps"
+      effect: "NoSchedule"
+    - key: "type"
+      operator: "Equal"
+      value: "test-applications"
+      effect: "NoSchedule"
+    - key: "type"
+      operator: "Equal"
+      value: "load-testing"
+      effect: "NoSchedule"
+    - key: "type"
+      operator: "Equal"
+      value: "service-mesh"
+      effect: "NoSchedule"
+etcd:
+  tolerations:
+    - operator: Exists
+    - key: "type"
+      operator: "Equal"
+      value: "preinstalled-apps"
+      effect: "NoSchedule"
+    - key: "type"
+      operator: "Equal"
+      value: "test-applications"
+      effect: "NoSchedule"
+    - key: "type"
+      operator: "Equal"
+      value: "load-testing"
+      effect: "NoSchedule"
+    - key: "type"
+      operator: "Equal"
+      value: "service-mesh"
+      effect: "NoSchedule"
+operator:
+  tolerations:
+    - operator: Exists
+    - key: "type"
+      operator: "Equal"
+      value: "preinstalled-apps"
+      effect: "NoSchedule"
+    - key: "type"
+      operator: "Equal"
+      value: "test-applications"
+      effect: "NoSchedule"
+    - key: "type"
+      operator: "Equal"
+      value: "load-testing"
+      effect: "NoSchedule"
+    - key: "type"
+      operator: "Equal"
+      value: "service-mesh"
+      effect: "NoSchedule"
+nodeinit:
+  tolerations:
+    - operator: Exists
+    - key: "type"
+      operator: "Equal"
+      value: "preinstalled-apps"
+      effect: "NoSchedule"
+    - key: "type"
+      operator: "Equal"
+      value: "test-applications"
+      effect: "NoSchedule"
+    - key: "type"
+      operator: "Equal"
+      value: "load-testing"
+      effect: "NoSchedule"
+    - key: "type"
+      operator: "Equal"
+      value: "service-mesh"
+      effect: "NoSchedule"
+preflight:
+  tolerations:
+    - key: node.kubernetes.io/not-ready
+      effect: NoSchedule
+    - key: node-role.kubernetes.io/master
+      effect: NoSchedule
+    - key: node-role.kubernetes.io/control-plane
+      effect: NoSchedule
+    - key: node.cloudprovider.kubernetes.io/uninitialized
+      effect: NoSchedule
+      value: "true"
+    - key: CriticalAddonsOnly
+      operator: "Exists"
+    - key: "type"
+      operator: "Equal"
+      value: "preinstalled-apps"
+      effect: "NoSchedule"
+    - key: "type"
+      operator: "Equal"
+      value: "test-applications"
+      effect: "NoSchedule"
+    - key: "type"
+      operator: "Equal"
+      value: "load-testing"
+      effect: "NoSchedule"
+    - key: "type"
+      operator: "Equal"
+      value: "service-mesh"
+      effect: "NoSchedule"
+clustermesh:
+  config:
+    tolerations:
+      - key: "type"
+        operator: "Equal"
+        value: "preinstalled-apps"
+        effect: "NoSchedule"
+      - key: "type"
+        operator: "Equal"
+        value: "test-applications"
+        effect: "NoSchedule"
+      - key: "type"
+        operator: "Equal"
+        value: "load-testing"
+        effect: "NoSchedule"
+      - key: "type"
+        operator: "Equal"
+        value: "service-mesh"
+        effect: "NoSchedule"
+authentication:
+  mutual:
+    spire:
+      install:
+        agent:
+          tolerations:
+            - key: node.kubernetes.io/not-ready
+              effect: NoSchedule
+            - key: node-role.kubernetes.io/master
+              effect: NoSchedule
+            - key: node-role.kubernetes.io/control-plane
+              effect: NoSchedule
+            - key: node.cloudprovider.kubernetes.io/uninitialized
+              effect: NoSchedule
+              value: "true"
+            - key: CriticalAddonsOnly
+              operator: "Exists"
+            - key: "type"
+              operator: "Equal"
+              value: "preinstalled-apps"
+              effect: "NoSchedule"
+            - key: "type"
+              operator: "Equal"
+              value: "test-applications"
+              effect: "NoSchedule"
+            - key: "type"
+              operator: "Equal"
+              value: "load-testing"
+              effect: "NoSchedule"
+            - key: "type"
+              operator: "Equal"
+              value: "service-mesh"
+              effect: "NoSchedule"
+        server:
+          tolerations:
+            - key: "type"
+              operator: "Equal"
+              value: "preinstalled-apps"
+              effect: "NoSchedule"
+            - key: "type"
+              operator: "Equal"
+              value: "test-applications"
+              effect: "NoSchedule"
+            - key: "type"
+              operator: "Equal"
+              value: "load-testing"
+              effect: "NoSchedule"
+            - key: "type"
+              operator: "Equal"
+              value: "service-mesh"
+              effect: "NoSchedule"

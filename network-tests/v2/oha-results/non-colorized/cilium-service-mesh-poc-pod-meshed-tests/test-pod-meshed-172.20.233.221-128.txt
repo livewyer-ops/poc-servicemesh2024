@@ -1,0 +1,48 @@
+Started at 2024-03-29-14-58
+Summary:
+  Success rate:	100.00%
+  Total:	1239.6391 secs
+  Slowest:	0.3048 secs
+  Fastest:	0.0007 secs
+  Average:	0.0529 secs
+  Requests/sec:	2420.0593
+
+  Total data:	228.88 MiB
+  Size/request:	80
+  Size/sec:	189.07 KiB
+
+Response time histogram:
+  0.001 [1]       |
+  0.031 [423318]  |■■■■■■■
+  0.061 [1708019] |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.092 [679752]  |■■■■■■■■■■■■
+  0.122 [152562]  |■■
+  0.153 [30134]   |
+  0.183 [5005]    |
+  0.214 [908]     |
+  0.244 [223]     |
+  0.274 [61]      |
+  0.305 [16]      |
+
+Response time distribution:
+  10.00% in 0.0276 secs
+  25.00% in 0.0376 secs
+  50.00% in 0.0492 secs
+  75.00% in 0.0646 secs
+  90.00% in 0.0830 secs
+  95.00% in 0.0963 secs
+  99.00% in 0.1257 secs
+  99.90% in 0.1661 secs
+  99.99% in 0.2135 secs
+
+
+Details (average, fastest, slowest):
+  DNS+dialup:	0.0135 secs, 0.0002 secs, 0.2422 secs
+  DNS-lookup:	0.0000 secs, 0.0000 secs, 0.0438 secs
+
+Status code distribution:
+  [200] 2999999 responses
+
+Error distribution:
+  [1] Host is unreachable (os error 113)
+Finished at 2024-03-29-15-19

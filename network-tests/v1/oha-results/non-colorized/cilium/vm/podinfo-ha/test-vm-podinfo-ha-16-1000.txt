@@ -1,0 +1,50 @@
+Started at 2024-03-22-10-07
+Summary:
+  Success rate:	100.00%
+  Total:	180.0011 secs
+  Slowest:	0.3830 secs
+  Fastest:	0.0038 secs
+  Average:	0.0307 secs
+  Requests/sec:	999.9937
+
+  Total data:	13.73 MiB
+  Size/request:	80
+  Size/sec:	78.12 KiB
+
+Response time histogram:
+  0.004 [1]      |
+  0.042 [149788] |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.080 [14763]  |■■■
+  0.118 [5541]   |■
+  0.155 [2166]   |
+  0.193 [1424]   |
+  0.231 [1460]   |
+  0.269 [1826]   |
+  0.307 [1987]   |
+  0.345 [838]    |
+  0.383 [191]    |
+
+Response time distribution:
+  10.00% in 0.0065 secs
+  25.00% in 0.0076 secs
+  50.00% in 0.0110 secs
+  75.00% in 0.0263 secs
+  90.00% in 0.0699 secs
+  95.00% in 0.1287 secs
+  99.00% in 0.2878 secs
+  99.90% in 0.3455 secs
+  99.99% in 0.3735 secs
+
+
+Details (average, fastest, slowest):
+  DNS+dialup:	0.0068 secs, 0.0025 secs, 0.3035 secs
+  DNS-lookup:	0.0000 secs, 0.0000 secs, 0.0031 secs
+
+Status code distribution:
+  [200] 179985 responses
+
+Error distribution:
+  [11] aborted due to deadline
+  [3] Connection reset by peer (os error 104)
+  [1] Connection refused (os error 111)
+Finished at 2024-03-22-10-10

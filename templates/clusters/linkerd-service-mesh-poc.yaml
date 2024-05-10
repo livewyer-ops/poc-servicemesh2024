@@ -1,0 +1,275 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: linkerd-service-mesh-poc
+  namespace: flux-system
+spec:
+  chart:
+    spec:
+      chart: capi-aws-eks-cluster
+      version: 0.1.6
+      sourceRef:
+        kind: HelmRepository
+        name: lw-helm-charts-registry
+  interval: 5m0s
+  timeout: 15m0s
+  targetNamespace: linkerd-service-mesh-poc
+  releaseName: linkerd-service-mesh-poc
+  install:
+    createNamespace: true
+  dependsOn:
+    - name: capi-providers
+  values:
+    global:
+      variables:
+        targetEnv: lwde-production
+        baseURL:
+          sys: "linkerd-service-mesh-poc.service-mesh.sys.wyer.live"
+          mgmt: "mgmt.wyer.live"
+    machinePool:
+      replicas: 4
+      instanceType: c5.large
+      availabilityZones:
+        - "us-east-1a"
+    cluster:
+      region: us-east-1
+      network:
+        vpc:
+          availabilityZoneUsageLimit: 2
+      addons:
+        - conflictResolution: overwrite
+          name: aws-ebs-csi-driver
+          version: v1.28.0-eksbuild.1
+          configuration: '{"controller":{"tolerations":[{"key":"type", "operator":"Equal", "value":"preinstalled-apps", "effect":"NoSchedule"}]}}'
+        - conflictResolution: overwrite
+          name: vpc-cni
+          version: v1.16.3-eksbuild.2
+        - conflictResolution: overwrite
+          name: coredns
+          version: v1.10.1-eksbuild.7
+          configuration: '{"tolerations":[{"key":"type", "operator":"Equal", "value":"preinstalled-apps", "effect":"NoSchedule"}]}'
+    apps:
+      enabled: true
+      flux_repositories:
+        - name: podinfo
+          spec:
+            interval: 60m0s
+            url: https://stefanprodan.github.io/podinfo
+      releases:
+        local-path-provisioner:
+          enabled: false
+        cluster-issuers:
+          enabled: false
+        hcp-vso:
+          enabled: false
+          # Preinstalled Apps
+        # Ingress Nginx
+        ingress-nginx:
+          enabled: true
+          chart:
+            version: 4.10.0
+            sourceRef:
+              name: ingress-nginx
+              namespace: flux-system
+          install:
+            remediation:
+              retries: -1
+          values:
+            controller:
+              setAsDefaultIngress: true
+              podAnnotations:
+                linkerd.io/inject: enabled
+              ingressClassResource:
+                default: true
+              tolerations:
+                - key: "type"
+                  operator: "Equal"
+                  value: "preinstalled-apps"
+                  effect: "NoSchedule"
+              admissionWebhooks:
+                patch:
+                  tolerations:
+                    - key: "type"
+                      operator: "Equal"
+                      value: "preinstalled-apps"
+                      effect: "NoSchedule"
+        # Cert Manager
+        cert-manager:
+          enabled: true
+          chart:
+            version: 1.14.3
+            sourceRef:
+              name: cert-manager
+              namespace: flux-system
+          install:
+            remediation:
+              retries: -1
+          values:
+            installCRDs: true
+            tolerations:
+              - key: "type"
+                operator: "Equal"
+                value: "preinstalled-apps"
+                effect: "NoSchedule"
+            startupapicheck:
+              tolerations:
+                - key: "type"
+                  operator: "Equal"
+                  value: "preinstalled-apps"
+                  effect: "NoSchedule"
+            cainjector:
+              tolerations:
+                - key: "type"
+                  operator: "Equal"
+                  value: "preinstalled-apps"
+                  effect: "NoSchedule"
+            webhook:
+              tolerations:
+                - key: "type"
+                  operator: "Equal"
+                  value: "preinstalled-apps"
+                  effect: "NoSchedule"
+        # External DNS
+        external-dns:
+          enabled: true
+          chart:
+            version: 0.1.5
+            sourceRef:
+              namespace: flux-system
+          dependsOn:
+            - name: ingress-nginx
+          values:
+            vaultSecrets: null
+            external-dns:
+              sources:
+                - service
+                - ingress
+              domainFilters: ["service-mesh.sys.wyer.live"]
+              tolerations:
+                - key: "type"
+                  operator: "Equal"
+                  value: "preinstalled-apps"
+                  effect: "NoSchedule"
+              provider: aws
+              aws:
+                region: eu-west-2
+                credentials:
+                  secretName: route53
+        # Kube Prometheus Stack
+        kube-prometheus-stack:
+          enabled: true
+          chart:
+            name: kube-prometheus-stack
+            version: 1.0.13
+            sourceRef:
+              namespace: flux-system
+          values:
+            kube-prometheus-stack:
+              kube-state-metrics:
+                tolerations:
+                  - key: "type"
+                    operator: "Equal"
+                    value: "preinstalled-apps"
+                    effect: "NoSchedule"
+              grafana:
+                tolerations:
+                  - key: "type"
+                    operator: "Equal"
+                    value: "preinstalled-apps"
+                    effect: "NoSchedule"
+                ingress:
+                  enabled: true
+                  ingressClassName: nginx
+                  annotations:
+                    cert-manager.io/cluster-issuer: selfsigned-tls
+                    kubernetes.io/tls-acme: "true"
+                  hosts:
+                    - "grafana.{{ .Values.global.variables.baseURL.sys }}"
+                datasources:
+                  datasources.yaml:
+                    apiVersion: 1
+                    datasources:
+                      - name: Prometheus
+                        type: prometheus
+                        access: proxy
+                        url: http://prometheus.{{ .Values.global.variables.baseURL.sys }}
+                        jsonData:
+                          tlsSkipVerify: true
+              prometheus:
+                prometheusSpec:
+                  tolerations:
+                    - key: "type"
+                      operator: "Equal"
+                      value: "preinstalled-apps"
+                      effect: "NoSchedule"
+                ingress:
+                  enabled: true
+                  ingressClassName: nginx
+                  annotations:
+                    cert-manager.io/cluster-issuer: selfsigned-tls
+                    kubernetes.io/tls-acme: "true"
+                  hosts:
+                    - "prometheus.{{ .Values.global.variables.baseURL.sys }}"
+              alertmanager:
+                enabled: false
+              prometheusOperator:
+                tolerations:
+                  - key: "type"
+                    operator: "Equal"
+                    value: "preinstalled-apps"
+                    effect: "NoSchedule"
+                admissionWebhooks:
+                  patch:
+                    tolerations:
+                      - key: "type"
+                        operator: "Equal"
+                        value: "preinstalled-apps"
+                        effect: "NoSchedule"
+                  deployment:
+                    tolerations:
+                      - key: "type"
+                        operator: "Equal"
+                        value: "preinstalled-apps"
+                        effect: "NoSchedule"
+                        # Test applications (bookinfo, podinfo)
+        bookinfo-basic:
+          enabled: true
+          chart:
+            name: bookinfo
+            version: "0.1.1"
+            sourceRef:
+              namespace: flux-system
+          values:
+            tolerations:
+              - key: "type"
+                operator: "Equal"
+                value: "test-applications"
+                effect: "NoSchedule"
+            productpage:
+              replicaCount: 1
+            details:
+              replicaCount: 1
+            ratings:
+              replicaCount: 1
+            reviewsV1:
+              replicaCount: 1
+            reviewsV2:
+              replicaCount: 1
+            reviewsV3:
+              replicaCount: 1
+            ingress:
+              enabled: true
+              className: "nginx"
+              annotations:
+                cert-manager.io/cluster-issuer: selfsigned-tls
+                kubernetes.io/tls-acme: "true"
+                nginx.ingress.kubernetes.io/service-upstream: "true"
+              hosts:
+                - host: "bookinfo-basic.{{ .Values.global.variables.baseURL.sys }}"
+                  paths:
+                    - path: /
+                      pathType: ImplementationSpecific
+              tls:
+                - secretName: bookinfo-basic-tls
+                  hosts:
+                    - "bookinfo-basic.{{ .Values.global.variables.baseURL.sys }}"

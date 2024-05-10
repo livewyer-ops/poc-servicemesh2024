@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+#
+# Run oha commands on specified hosts and upload results to s3 bucket
+
+# Safe scripting
+set -euo pipefail
+
+# List of vars
+#
+CLUSTER_NAME=linkerd-service-mesh-poc
+STARTING_POINT=vm-meshed
+FQDN=$CLUSTER_NAME.service-mesh.sys.wyer.live
+BOOKINFO_URL="bookinfo-basic.${FQDN}/productpage?u=normal"
+PREFIX=https://
+# Bookinfo
+## Warm Up
+WARM_UP_CONCURRENT_CONNECTIONS_ARRAY=(32 32 32)
+WARM_UP_BOOKINFO_REQUESTS=10000
+## Tests
+CONCURRENT_CONNECTIONS_ARRAY=(32 64 128)
+BOOKINFO_REQUESTS=300000
+# AWS
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+BUCKET_NAME=service-mesh-poc
+REGION=eu-west-2
+FOLDER_NAME=$CLUSTER_NAME-$STARTING_POINT
+
+# Define functions
+install-aws() {
+  # Install aws cli
+  apt-get update
+  apt-get install -y curl
+  apt-get install -y unzip
+  echo "Installing AWS CLI..."
+  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+  unzip awscliv2.zip
+  ./aws/install
+
+  aws --version
+
+  # Add aws credentials
+  echo "Adding AWS credentials..."
+  mkdir ~/.aws
+  echo "[default]
+  aws_access_key_id = ${AWS_ACCESS_KEY_ID}
+  aws_secret_access_key = ${AWS_SECRET_ACCESS_KEY}
+  region = ${REGION}" >~/.aws/config
+}
+
+install-oha() {
+  # Install oha
+  echo "Installing oha CLI..."
+  curl -L https://github.com/hatoo/oha/releases/download/v1.4.1/oha-linux-amd64 -o oha
+  chmod +x ./oha
+  mv ./oha /usr/local/bin/oha
+
+  oha --version
+}
+
+folder() {
+  # Create a folder for test results
+  echo "Creating folder for test results..."
+  mkdir "$FOLDER_NAME"
+}
+
+run-tests() {
+  # Run tests and save output to the file
+  echo "Running tests..."
+  echo "Configuration: Number of requests: ${REQUESTS}, Number of connections: ${CONCURRENT_CONNECTIONS}, URL: ${PREFIX}${URL}"
+  APP_NAME="${URL%%.*}"
+  FILE_NAME="test-$APP_NAME-$CONCURRENT_CONNECTIONS-$REQUESTS.txt"
+  echo "Started at $(date "+%Y-%m-%d-%H-%M")" 2>&1 | tee "$FOLDER_NAME/$FILE_NAME"
+  oha "$PREFIX$URL" -c "$CONCURRENT_CONNECTIONS" -n "$REQUESTS" --disable-keepalive --disable-compression --insecure --ipv4 --no-tui >>"$FOLDER_NAME/$FILE_NAME"
+  echo "Finished at $(date "+%Y-%m-%d-%H-%M")" 2>&1 | tee -a "$FOLDER_NAME/$FILE_NAME"
+  cat "$FOLDER_NAME/$FILE_NAME"
+}
+
+upload-files() {
+  # Upload files to the bucket
+  aws s3 cp ./"$FOLDER_NAME" s3://"$BUCKET_NAME"/"$FOLDER_NAME" --recursive
+}
+
+install-aws
+install-oha
+folder
+
+# Warm Up Bookinfo
+for c in "${WARM_UP_CONCURRENT_CONNECTIONS_ARRAY[@]}"; do
+  CONCURRENT_CONNECTIONS=$c
+  REQUESTS=$WARM_UP_BOOKINFO_REQUESTS
+  URL=$BOOKINFO_URL
+  run-tests
+done
+# Run tests against Bookinfo
+for c in "${CONCURRENT_CONNECTIONS_ARRAY[@]}"; do
+  CONCURRENT_CONNECTIONS=$c
+  REQUESTS=$BOOKINFO_REQUESTS
+  URL=$BOOKINFO_URL
+  run-tests
+done
+
+upload-files

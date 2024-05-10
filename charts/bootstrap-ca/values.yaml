@@ -1,0 +1,23 @@
+trustAnchor:
+  rootIssuerName: selfsigned-issuer
+  certificate:
+    name: linkerd-trust-anchor
+    namespace: cert-manager
+    commonName: root.linkerd.cluster.local
+    duration: 8760h # 365 days
+    algorithm: ECDSA
+    size: 256
+  bundle:
+    name: linkerd-identity-trust-roots
+    secretKey: ca.crt
+    configmapKey: ca-bundle.crt
+
+issuerCertificate:
+  intermediateIssuerName: workshop-intermediate-issuer
+  certificate:
+    name: linkerd-identity-issuer
+    namespace: linkerd
+    commonName: identity.linkerd.cluster.local
+    duration: 48h # 2 days
+    algorithm: ECDSA
+    size: 256

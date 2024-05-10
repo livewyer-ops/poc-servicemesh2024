@@ -1,0 +1,43 @@
+# Create root issuer
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: {{ .Values.trustAnchor.rootIssuerName }}
+spec:
+  selfSigned: {}
+---
+# Create trust anchor certificate
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Values.trustAnchor.certificate.name }}
+  namespace: {{ .Values.trustAnchor.certificate.namespace }}
+spec:
+  isCA: true
+  commonName: {{ .Values.trustAnchor.certificate.commonName }}
+  secretName: {{ .Values.trustAnchor.certificate.name }}
+  duration: {{ .Values.trustAnchor.certificate.duration }}
+  privateKey:
+    algorithm: {{ .Values.trustAnchor.certificate.algorithm }}
+    size: {{ .Values.trustAnchor.certificate.size }}
+  issuerRef:
+    name: {{ .Values.trustAnchor.rootIssuerName }}
+    kind: ClusterIssuer
+    group: cert-manager.io
+  usages:
+    - cert sign
+    - crl sign
+---
+# Create configmap with trust anchor certificate
+apiVersion: trust.cert-manager.io/v1alpha1
+kind: Bundle
+metadata:
+    name: {{ .Values.trustAnchor.bundle.name }}
+spec:
+  sources:
+    - secret:
+        name: "{{ .Values.trustAnchor.certificate.name }}"
+        key: "{{ .Values.trustAnchor.bundle.secretKey }}"
+  target:
+    configMap:
+      key: "{{ .Values.trustAnchor.bundle.configmapKey }}"

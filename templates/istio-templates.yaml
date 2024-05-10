@@ -1,0 +1,76 @@
+# Basic Istio templates to enforce mTLS and expose test application using Istio Gateway
+# Enforce mTLS policy 
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: istio-system
+spec:
+  mtls:
+    mode: STRICT
+---
+# mTLS policy for load testing job 
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: default
+spec:
+  mtls:
+    mode: PERMISSIVE
+---
+# Wildcard tls certificate
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-tls
+  namespace: istio-ingress
+spec:
+  dnsNames:
+    - '*.istio-service-mesh-poc.service-mesh.sys.wyer.live'
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: selfsigned-tls
+  secretName: wildcard-tls
+  usages:
+    - digital signature
+    - key encipherment
+---
+# Bookinfo basic
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: bookinfo-basic-gateway
+  namespace: bookinfo-basic
+spec:
+  selector:
+    istio: ingress
+  servers:
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      hosts:
+        - "bookinfo-basic.istio-service-mesh-poc.service-mesh.sys.wyer.live"
+      tls:
+        mode: SIMPLE
+        credentialName: wildcard-tls
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: bookinfo-basic
+  namespace: bookinfo-basic
+spec:
+  hosts:
+    - "bookinfo-basic.istio-service-mesh-poc.service-mesh.sys.wyer.live"
+  gateways:
+    - bookinfo-basic-gateway
+  http:
+    - route:
+        - destination:
+            port:
+              number: 9080
+            host: productpage
+---

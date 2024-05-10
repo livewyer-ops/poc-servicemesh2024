@@ -1,0 +1,100 @@
+# Basic Cilium templates to enforce mTLS and expose test application using Gateway API
+# Enforce mTLS policy 
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: mutual-auth
+  namespace: default
+spec:
+  endpointSelector:
+    matchLabels: {}
+  ingress:
+    - fromEntities:
+        - all
+  egress:
+    - toEntities:
+        - all
+---
+# Enforce mTLS policy 
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: mutual-auth
+  namespace: bookinfo-basic
+spec:
+  endpointSelector:
+    matchLabels: {}
+  ingress:
+    - fromEntities:
+        - all
+    - fromEndpoints:
+        - matchLabels:
+            app: details
+        - matchLabels:
+            app: productpage
+        - matchLabels:
+            app: ratings
+        - matchLabels:
+            app: reviews
+        - matchLabels:
+            app: load-testing
+      authentication:
+        mode: "required"
+  egress:
+    - toEntities:
+        - all
+---
+# Bookinfo Basic
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: bookinfo-basic-gateway
+  namespace: bookinfo-basic
+spec:
+  gatewayClassName: cilium
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "bookinfo-basic.cilium-service-mesh-poc.service-mesh.sys.wyer.live"
+      tls:
+        certificateRefs:
+          - kind: Secret
+            name: bookinfo-basic-tls
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: bookinfo-basic-https
+  namespace: bookinfo-basic
+spec:
+  parentRefs:
+    - name: bookinfo-basic-gateway
+  hostnames:
+    - "bookinfo-basic.cilium-service-mesh-poc.service-mesh.sys.wyer.live"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: productpage
+          port: 9080
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: bookinfo-basic
+  namespace: bookinfo-basic
+spec:
+  dnsNames:
+    - 'bookinfo-basic.cilium-service-mesh-poc.service-mesh.sys.wyer.live'
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: selfsigned-tls
+  secretName: bookinfo-basic-tls
+  usages:
+    - digital signature
+    - key encipherment
+---

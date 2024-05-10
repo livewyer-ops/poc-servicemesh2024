@@ -1,0 +1,29 @@
+productpage:
+  replicaCount: 1
+
+details:
+  replicaCount: 1
+
+ratings:
+  replicaCount: 1
+
+reviewsV1:
+  replicaCount: 1
+
+reviewsV2:
+  replicaCount: 1
+
+reviewsV3:
+  replicaCount: 1
+
+ingress:
+  enabled: true
+  className: ""
+  additionalLabels: {}
+  annotations: {}
+  hosts:
+    - host: bookinfo.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []

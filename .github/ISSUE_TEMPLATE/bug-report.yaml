@@ -1,0 +1,41 @@
+name: 🐛 Bug Report
+description: File a new bug report
+title: 'bug: '
+labels: [Bug]
+body:
+  - type: textarea
+    attributes:
+      label: 'Describe the bug'
+      description: 'A clear and concise description of what the bug is.'
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: 'Steps to reproduce'
+      description: |
+        1. Do this'....'
+        2. Scroll down to '....'
+        3. See error.
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: 'Expected behavior'
+      description: "A clear and concise description of what you expected to happen."
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: 'Evidence'
+      description: 'If applicable, add code snippets, links, or screenshots to help explain your problem.'
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: 'Environment'
+      description: 'Please complete the following information'
+      placeholder: |
+        - OS (distibution), version : [e.g. Linux (Ubuntu), 20.0.3]
+        - Tools and versions: [e.g. Docker Desktop 4.19.0]
+    validations:
+      required: true

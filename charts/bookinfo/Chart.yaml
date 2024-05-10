@@ -1,0 +1,6 @@
+apiVersion: v2
+name: bookinfo
+description: A Helm chart for Kubernetes to deploy Istio bookinfo application
+type: application
+version: 0.1.1
+appVersion: 1.16.0

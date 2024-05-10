@@ -1,0 +1,45 @@
+Started at 2024-03-29-13-18
+Summary:
+  Success rate:	100.00%
+  Total:	148.6807 secs
+  Slowest:	0.1459 secs
+  Fastest:	0.0007 secs
+  Average:	0.0158 secs
+  Requests/sec:	2017.7470
+
+  Total data:	22.89 MiB
+  Size/request:	80
+  Size/sec:	157.64 KiB
+
+Response time histogram:
+  0.001 [1]      |
+  0.015 [183986] |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.030 [84623]  |■■■■■■■■■■■■■■
+  0.044 [26831]  |■■■■
+  0.059 [3727]   |
+  0.073 [658]    |
+  0.088 [104]    |
+  0.102 [32]     |
+  0.117 [26]     |
+  0.131 [5]      |
+  0.146 [7]      |
+
+Response time distribution:
+  10.00% in 0.0067 secs
+  25.00% in 0.0092 secs
+  50.00% in 0.0128 secs
+  75.00% in 0.0200 secs
+  90.00% in 0.0301 secs
+  95.00% in 0.0358 secs
+  99.00% in 0.0473 secs
+  99.90% in 0.0690 secs
+  99.99% in 0.1078 secs
+
+
+Details (average, fastest, slowest):
+  DNS+dialup:	0.0046 secs, 0.0002 secs, 0.1186 secs
+  DNS-lookup:	0.0000 secs, 0.0000 secs, 0.0133 secs
+
+Status code distribution:
+  [200] 300000 responses
+Finished at 2024-03-29-13-20

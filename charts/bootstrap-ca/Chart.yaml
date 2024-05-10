@@ -1,0 +1,6 @@
+apiVersion: v2
+name: bootstrap-ca
+description: A Helm chart for Kubernetes to bootstrap CA
+type: application
+version: 0.1.1
+appVersion: 1.16.0

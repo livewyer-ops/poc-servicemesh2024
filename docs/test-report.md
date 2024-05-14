@@ -178,7 +178,7 @@ From the tables above we can say that:
 - on 32 connections Linkerd is the fastest service mesh and Cilium is the slowest one.
 - on 64 connections Linkerd is the fastest service mesh, Istio still performs better than Cilium, but the difference is smaller than on 32 connections.
 - on 128 connections Linkerd is the fastest service mesh and Cilium is the slowest one.  
-  :eight*pointed_black_star: \_Note: Tests for Cilium and Baseline have failed due to a memory leak in the Bookinfo app, that caused pod recreation, so they are outliers in this test. You can also see this on the [App CPU Usage diagrams](#app-cpu-usage-1). However reviewing the trend on 32 and 64 connections, I can say that without pod recreation, Istio and Cilium would have similar latency.*
+  :eight_pointed_black_star: *Note: Tests for Cilium and Baseline have failed due to a memory leak in the Bookinfo app, that caused pod recreation, so they are outliers in this test. You can also see this on the [App CPU Usage diagrams](#app-cpu-usage-1). However reviewing the trend on 32 and 64 connections, I can say that without pod recreation, Istio and Cilium would have similar latency.*
 
 **Summary**
 

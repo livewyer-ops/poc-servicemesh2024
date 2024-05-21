@@ -50,7 +50,7 @@ spec:
   chart:
     spec:
       chart: capi-aws-eks-cluster
-      version: 0.1.5
+      version: 0.1.6
       sourceRef:
         kind: HelmRepository
         name: lw-helm-charts-registry
@@ -74,23 +74,20 @@ spec:
     machinePool:
       replicas: 2
     cluster:
-      vpcCni:
-        disable: true
+      region: us-east-1
       addons:
         - conflictResolution: overwrite
           name: aws-ebs-csi-driver
           version: v1.28.0-eksbuild.1
         - conflictResolution: overwrite
+          name: vpc-cni
+          version: v1.16.3-eksbuild.2
+        - conflictResolution: overwrite
           name: coredns
           version: v1.10.1-eksbuild.7
-        - conflictResolution: overwrite
-          name: snapshot-controller
-          version: v6.3.2-eksbuild.1
 ```
 
 </details>
-
-_Note: All clusters will use Cilium CNI, so VPC CNI is disabled for all products_
 
 ## Istio
 
@@ -221,8 +218,17 @@ The below changes were made to the Helm release template to create AWS EKS clust
 spec:
   values:
     cluster:
+      vpcCni:
+        disable: true
       kubeProxy:
         disable: true
+      addons:
+        - conflictResolution: overwrite
+          name: aws-ebs-csi-driver
+          version: v1.28.0-eksbuild.1
+        - conflictResolution: overwrite
+          name: coredns
+          version: v1.10.1-eksbuild.7
 ```
 
 </details>

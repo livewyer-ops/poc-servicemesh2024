@@ -204,6 +204,8 @@ The results are compared using the diagrams inside the tables. To easily underst
 - Service mesh - Name of the product
 - `<Component>` CPU Usage - Name of the CPU consumer
 
+***Note:** Cilium CPU measurement does not include the consumption of eBPF programs running in the kernel.*
+
 ### Pod to Service communication
 
 **App CPU Usage**
@@ -329,6 +331,8 @@ It's important to know how often you need to upgrade your software, so below you
 **Summary**
 
 If your environment uses Cilium CNI, then Cilium service mesh would be a suitable decision. All you need to do is update the configuration and create policies for meshed services. However, if your environment does not use Cilium CNI, then implementing Cilium service mesh can become a time-consuming and difficult process.
+
+***Note:** Please note that Cilium utilizes Cilium's mTLS-based Mutual Authentication, which is not a typical mTLS solution, but aims to resolve the same issues.*
 
 ### Istio
 

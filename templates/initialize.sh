@@ -15,11 +15,9 @@ initialize() {
 
   # Add user and fetch kubeconfig
   echo "Fetching kubeconfig..."
-  
   kubectl --namespace="$CLUSTER_NAME" get secret "$CLUSTER_NAME-kubeconfig" -o jsonpath='{.data.value}' | base64 --decode >managed-test.kubeconfig
   kubectl --kubeconfig managed-test.kubeconfig patch configmap -n kube-system aws-auth -p '{"data":{"mapUsers":"[{\"userarn\": \"arn:aws:iam::000000000000:user/lw-oleksandr\", \"username\": \"lw-oleksandr\", \"groups\": [\"system:masters\"]}, {\"userarn\": \"arn:aws:iam::000000000000:user/lw-walter\", \"username\": \"lw-walter\", \"groups\": [\"system:masters\"]}]"}}'
   
-  CLUSTER_NAME='istio-ambient-service-mesh-poc'
   aws eks update-kubeconfig --name "$CLUSTER_NAME"_"$CLUSTER_NAME"-control-plane
 
   # Patch AWS Node DS
@@ -146,12 +144,14 @@ cilium() {
 
   echo "Upgrading Cilium deployment..."
   # Value of API_SERVER_IP variable is public IP or hostname of your API Server
-  API_SERVER_IP=127.0.0.1
-  API_SERVER_PORT=36057
-  helm upgrade --install cilium cilium/cilium --version 1.15.1 \
+  API_SERVER_IP=$CILIUM_API_SERVER_IP
+  API_SERVER_PORT=443
+  helm upgrade --install cilium cilium/cilium --version 1.15.1 --values templates/tolerations.yaml \
     --namespace kube-system \
-    --set image.pullPolicy=IfNotPresent \
-    --set ipam.mode=kubernetes \
+    --set eni.enabled=true \
+    --set ipam.mode=eni \
+    --set egressMasqueradeInterfaces=eth0 \
+    --set routingMode=native \
     --set kubeProxyReplacement=true \
     --set k8sServiceHost=${API_SERVER_IP} \
     --set k8sServicePort=${API_SERVER_PORT} \

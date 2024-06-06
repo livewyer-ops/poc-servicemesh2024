@@ -695,7 +695,7 @@ Going back to the original purpose of this summary, we are unable to recommend a
 |-------------------------------------|----------------------------------------------------------------|
 | Performance                         | No Mesh or Linkerd                                             |
 | Ease of Installation                | Cilium (if using Cilium CNI) or Istio Sidecar or Istio Ambient |
-| Ease of Maintenance                 | Cilium (if using Cilium CNI) or Istio Sidecar                  |
+| Ease of Maintenance                 | Cilium (if using Cilium CNI) or Istio Sidecar or Istio Ambient ( when it reaches GA ) |
 | Compliance                          | All meshes have FIPS-compliant builds                          |
 | Reduced Cost & Resource Utilisation | Cilium or Linkerd or Istio Ambient                             |
 | Available support contracts         | All meshes have available support contracts                    |

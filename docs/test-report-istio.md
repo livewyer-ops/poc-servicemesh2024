@@ -322,9 +322,9 @@ The results are compared using the diagrams inside the tables. To easily underst
 
 **Performance Tests Summary**
 
-Based on the tables above, we can conclude that Istio Ambient consumes fewer resources and performs better than Istio Sidecar for all communications. Istio Ambient consistently uses less memory. However, the difference in CPU usage depends on the number of pods managed by the `ztunnel` DaemonSet. For instance, in our load testing job with one pod, the CPU usage remains the same for both Istio Ambient and Istio Sidecar. But for the `bookinfo` app, the CPU usage differs by approximately 25%.
+Based on the tables above, we can conclude that Istio Ambient consumes fewer resources and performs better than Istio Sidecar for all communications. Istio Ambient consistently uses less memory. However, the difference in CPU usage depends on the number of pods managed by the `ztunnel` DaemonSet. For instance, in our load testing job with one pod, the CPU usage remains the same for both Istio Ambient and Istio Sidecar. But for the `bookinfo` app, the CPU usage differs by approximately 25% in favour of Istio Ambient.
 
-In terms of ingress traffic, both Istio Ambient and Istio Sidecar environments utilise the same Istio Ingress Controller, so any difference in resource overhead should be attributed to variations in performance of the mesh.
+In terms of ingress traffic, while both Istio Ambient and Istio Sidecar environments utilise the same Istio Ingress Controller, the resource usage difference is approximately 25% in favour of Istio Sidecar.
 
 ### Operational Impact
 

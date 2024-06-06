@@ -1,0 +1,46 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: load-testing-job
+  namespace: default
+spec:
+  template:
+    spec:
+      tolerations:
+        - effect: NoSchedule
+          key: type
+          operator: Equal
+          value: load-testing
+      restartPolicy: Never
+      containers:
+        - name: run-script
+          image: ubuntu:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "copy scripts to /tmp"
+              cp /load-testing-script/load-testing.sh /tmp
+              echo "apply 'chmod +x' to /tmp/load-testing.sh"
+              chmod +x /tmp/load-testing.sh
+              echo "execute load-testing.sh now"
+              /tmp/load-testing.sh
+          volumeMounts:
+            - mountPath: /load-testing-script
+              name: load-testing-script
+          env:
+            - name: CLUSTER_NAME
+              value: istio-ambient-service-mesh-poc
+            - name: STARTING_POINT
+              value: replica-8
+            - name: BOOKINFO_URL
+              value: productpage.bookinfo-basic.svc:9080/productpage?u=normal
+            - name: AWS_ACCESS_KEY_ID
+              value:
+            - name: AWS_SECRET_ACCESS_KEY
+              value:
+      volumes:
+        - name: load-testing-script
+          configMap:
+            name: load-testing-script

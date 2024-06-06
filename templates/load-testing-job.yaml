@@ -53,4 +53,3 @@ spec:
         - name: load-testing-script
           configMap:
             name: load-testing-script
-

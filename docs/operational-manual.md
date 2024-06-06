@@ -3,25 +3,31 @@
 - [Operational Manual](#operational-manual)
   - [Overview](#overview)
   - [Shared cluster configuration](#shared-cluster-configuration)
-  - [Istio](#istio)
+  - [Istio Ambient](#istio-ambient)
     - [Installation](#installation)
     - [Day 2 Operations](#day-2-operations)
-      - [Istio versions](#istio-versions)
+      - [Istio Ambient versions](#istio-ambient-versions)
       - [Monitoring](#monitoring)
       - [Uninstall](#uninstall)
-  - [Cilium](#cilium)
-    - [Cluster configuration](#cluster-configuration)
+  - [Istio Sidecar](#istio-sidecar)
     - [Installation](#installation-1)
     - [Day 2 Operations](#day-2-operations-1)
-      - [Cilium versions](#cilium-versions)
+      - [Istio Sidecar versions](#istio-sidecar-versions)
       - [Monitoring](#monitoring-1)
       - [Uninstall](#uninstall-1)
-  - [Linkerd](#linkerd)
+  - [Cilium](#cilium)
+    - [Cluster configuration](#cluster-configuration)
     - [Installation](#installation-2)
     - [Day 2 Operations](#day-2-operations-2)
-      - [Linkerd versions](#linkerd-versions)
+      - [Cilium versions](#cilium-versions)
       - [Monitoring](#monitoring-2)
       - [Uninstall](#uninstall-2)
+  - [Linkerd](#linkerd)
+    - [Installation](#installation-3)
+    - [Day 2 Operations](#day-2-operations-3)
+      - [Linkerd versions](#linkerd-versions)
+      - [Monitoring](#monitoring-3)
+      - [Uninstall](#uninstall-3)
       - [Control plane TLS certificates](#control-plane-tls-certificates)
       - [Webhook TLS certificates](#webhook-tls-certificates)
 
@@ -89,13 +95,133 @@ spec:
 
 </details>
 
-## Istio
+## Istio Ambient
 
-This section provides instructions on how to install and operate Istio service mesh.
+This section provides instructions on how to install and operate Istio service mesh in Ambient mode.
 
 ### Installation
 
-This subsection provides installation instructions for Istio. Following these instructions you will install Istio service mesh and Istio Gateway.
+This subsection provides installation instructions for Istio Ambient. Following these instructions you will install Istio service mesh in Ambient mode and Istio Gateway.
+
+1. Add Helm repo
+
+   ```bash
+   helm repo add istio https://istio-release.storage.googleapis.com/charts
+   helm repo update
+   ```
+
+2. Install Istio CRDs
+
+   ```bash
+   helm install istio-base istio/base -n istio-system --create-namespace --wait
+   ```
+
+3. Install Istio CNI
+
+   ```bash
+   helm install istio-cni istio/cni -n istio-system --set profile=ambient --wait
+   ```
+
+4. Install Istio Discovery service
+
+   ```bash
+   helm install istiod istio/istiod -n istio-system --set profile=ambient --wait
+   ```
+
+5. Install Istio ztunnel
+
+   ```bash
+   helm install ztunnel istio/ztunnel -n istio-system --wait
+   ```
+
+6. Install Istio Ingress Gateway
+
+   ```bash
+    helm install istio-ingress istio/gateway -n istio-ingress --create-namespace --wait
+   ```
+
+7. Verify installation
+
+   ```bash
+   # Ensure pods are up and running
+   kubectl get pods -n istio-system
+   kubectl get pods -n istio-ingress
+   # Ensure LoadBalancer service is created
+   kubectl get svc -n istio-ingress istio-ingress
+   ```
+
+Refer to the [official documentation](https://istio.io/latest/docs/ambient/getting-started/#bookinfo) to test Istio Ambient features.
+
+### Day 2 Operations
+
+List of day 2 operations:
+
+- [Istio Ambient versions](#istio-ambient-versions)
+- [Monitoring](#monitoring)
+- [Uninstall](#uninstall)
+
+#### Istio Ambient versions
+
+Refer to the official [Upgrade Guide](https://istio.io/latest/docs/ambient/upgrade/helm-upgrade/) for detailed instructions on upgrading.
+
+#### Monitoring
+
+Istio supports a wide variety of observability tools, you can find more details in [the official documentation](https://istio.io/latest/docs/tasks/observability).
+
+#### Uninstall
+
+Follow the below instructions to uninstall Istio:
+
+1. Uninstall Istio Gateway
+
+   ```bash
+   helm delete istio-ingress -n istio-ingress
+   ```
+
+2. Uninstall Istio CNI
+
+   ```bash
+   helm delete istio-cni -n istio-system
+   ```
+
+3. Uninstall Istio ztunnel
+
+   ```bash
+   helm delete ztunnel -n istio-system
+   ```
+
+4. Uninstall Istio Discovery service
+
+   ```bash
+   helm delete istiod -n istio-system
+   ```
+
+5. Uninstall Istio CRDs
+
+   ```bash
+   helm delete istio-base -n istio-system
+   ```
+
+6. Delete remaining CRDs
+
+   ```bash
+   kubectl get crd -oname | grep --color=never 'istio.io' | xargs kubectl delete
+   ```
+
+7. Delete namespaces
+
+   ```bash
+   kubectl delete namespace istio-ingress
+   kubectl delete namespace istio-system
+   ```
+
+## Istio Sidecar
+
+This section provides instructions on how to install and operate Istio service mesh in Sidecar mode.
+
+### Installation
+
+This subsection provides installation instructions for Istio Sidecar. Following these instructions you will install Istio service mesh in Sidecar mode and Istio Gateway.
 
 1. Add Helm repo
 
@@ -119,7 +245,7 @@ This subsection provides installation instructions for Istio. Following these in
 4. Install Istio Ingress Gateway
 
    ```bash
-    helm install istio-ingress istio/gateway -n istio-ingress --create-namespace --wait
+   helm install istio-ingress istio/gateway -n istio-ingress --create-namespace --wait
    ```
 
 5. Verify installation
@@ -138,11 +264,11 @@ Refer to the [official documentation](https://istio.io/latest/docs/setup/getting
 
 List of day 2 operations:
 
-- [Istio versions](#istio-versions)
-- [Monitoring](#monitoring)
-- [Uninstall](#uninstall)
+- [Istio Sidecar versions](#istio-sidecar-versions)
+- [Monitoring](#monitoring-1)
+- [Uninstall](#uninstall-1)
 
-#### Istio versions
+#### Istio Sidecar versions
 
 Refer to the official [Upgrade Guide](https://istio.io/latest/docs/setup/upgrade) for detailed instructions on upgrading.
 
@@ -175,20 +301,7 @@ Follow the below instructions to uninstall Istio:
 4. Delete remaining CRDs
 
    ```bash
-   kubectl delete crd authorizationpolicies.security.istio.io
-   kubectl delete crd destinationrules.networking.istio.io
-   kubectl delete crd envoyfilters.networking.istio.io
-   kubectl delete crd gateways.networking.istio.io
-   kubectl delete crd peerauthentications.security.istio.io
-   kubectl delete crd proxyconfigs.networking.istio.io
-   kubectl delete crd requestauthentications.security.istio.io
-   kubectl delete crd serviceentries.networking.istio.io
-   kubectl delete crd sidecars.networking.istio.io
-   kubectl delete crd telemetries.telemetry.istio.io
-   kubectl delete crd virtualservices.networking.istio.io
-   kubectl delete crd wasmplugins.extensions.istio.io
-   kubectl delete crd workloadentries.networking.istio.io
-   kubectl delete crd workloadgroups.networking.istio.io
+   kubectl get crd -oname | grep --color=never 'istio.io' | xargs kubectl delete
    ```
 
 5. Delete namespaces

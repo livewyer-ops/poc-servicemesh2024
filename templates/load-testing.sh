@@ -7,7 +7,7 @@ set -euo pipefail
 
 # List of vars
 #
-CLUSTER_NAME=linkerd-service-mesh-poc
+CLUSTER_NAME=
 STARTING_POINT=vm-meshed
 FQDN=$CLUSTER_NAME.service-mesh.sys.wyer.live
 BOOKINFO_URL="bookinfo-basic.${FQDN}/productpage?u=normal"
@@ -22,8 +22,8 @@ BOOKINFO_REQUESTS=300000
 # AWS
 AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
-BUCKET_NAME=service-mesh-poc
-REGION=eu-west-2
+BUCKET_NAME=
+REGION=us-east-1
 FOLDER_NAME=$CLUSTER_NAME-$STARTING_POINT
 
 # Define functions

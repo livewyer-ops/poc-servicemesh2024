@@ -5,7 +5,7 @@
 # Safe scripting
 set -euo pipefail
 
-CLUSTER_NAME='-service-mesh-poc'
+CLUSTER_NAME=
 CILIUM_API_SERVER_IP=
 
 initialize() {
@@ -17,8 +17,10 @@ initialize() {
   echo "Fetching kubeconfig..."
   kubectl --namespace="$CLUSTER_NAME" get secret "$CLUSTER_NAME-kubeconfig" -o jsonpath='{.data.value}' | base64 --decode >managed-test.kubeconfig
   kubectl --kubeconfig managed-test.kubeconfig patch configmap -n kube-system aws-auth -p '{"data":{"mapUsers":"[{\"userarn\": \"arn:aws:iam::000000000000:user/lw-oleksandr\", \"username\": \"lw-oleksandr\", \"groups\": [\"system:masters\"]}, {\"userarn\": \"arn:aws:iam::000000000000:user/lw-walter\", \"username\": \"lw-walter\", \"groups\": [\"system:masters\"]}]"}}'
+  
   aws eks update-kubeconfig --name "$CLUSTER_NAME"_"$CLUSTER_NAME"-control-plane
 
+  # ONLY FOR CILIUM 
   # Patch AWS Node DS
   # echo "Patching aws-node daemonset..."
   # kubectl -n kube-system patch daemonset aws-node --type='strategic' -p='{"spec":{"template":{"spec":{"nodeSelector":{"io.cilium/aws-node-enabled":"true"}}}}}'
@@ -50,21 +52,58 @@ restart-pods() {
 prerequisites() {
   initialize
   taints
-  #restart-pods
+  restart-pods
 }
 
 # Deploy service mesh
-istio() {
+istio_ambient() {
   # Istio
   echo "Starting Istio deployment..."
   helm repo add istio https://istio-release.storage.googleapis.com/charts
   helm repo update
 
   echo "Installing Istio CRDs..."
-  helm upgrade --install istio-base istio/base -n istio-system --create-namespace --set defaultRevision=default
+  helm upgrade --install istio-base istio/base -n istio-system --create-namespace --set defaultRevision=default --version 1.22.0 
+
+  echo "Installing Istio CNI..."
+  helm upgrade --install istio-cni istio/cni -n istio-system --set profile=ambient --wait --version 1.22.0
 
   echo "Installing Istio Discovery Service..."
-  helm upgrade --install istiod istio/istiod -n istio-system --wait \
+  helm upgrade --install istiod istio/istiod -n istio-system --set profile=ambient --wait --version 1.22.0 \
+    --set defaults.pilot.tolerations[0].key=type \
+    --set-string defaults.pilot.tolerations[0].value=service-mesh \
+    --set defaults.pilot.tolerations[0].operator=Equal \
+    --set defaults.pilot.tolerations[0].effect=NoSchedule \
+    --set defaults.pilot.resources.requests.memory=1024Mi
+
+  echo "Installing Istio ztunnel..."
+  helm upgrade --install ztunnel istio/ztunnel -n istio-system --wait --version 1.22.0 \
+    --set defaults.resources.requests.memory=1024Mi
+
+  kubectl wait --for=condition=Ready pods --all -n istio-system
+
+  # Can be disabled for some cases
+  echo "Installing Istio Gateway..."
+  helm install istio-ingress istio/gateway -n istio-ingress --create-namespace --wait --version 1.22.0 \
+    --set defaults.tolerations[0].key=type \
+    --set-string defaults.tolerations[0].value=service-mesh \
+    --set defaults.tolerations[0].operator=Equal \
+    --set defaults.tolerations[0].effect=NoSchedule
+
+  kubectl wait --for=condition=Ready pods --all -n istio-ingress
+}
+
+istio_sidecar() {
+  # Istio
+  echo "Starting Istio deployment..."
+  helm repo add istio https://istio-release.storage.googleapis.com/charts
+  helm repo update
+
+  echo "Installing Istio CRDs..."
+  helm upgrade --install istio-base istio/base -n istio-system --create-namespace --set defaultRevision=default --version 1.22.0 
+
+  echo "Installing Istio Discovery Service..."
+  helm upgrade --install istiod istio/istiod -n istio-system --wait --version 1.22.0 \
     --set defaults.pilot.tolerations[0].key=type \
     --set-string defaults.pilot.tolerations[0].value=service-mesh \
     --set defaults.pilot.tolerations[0].operator=Equal \
@@ -72,9 +111,8 @@ istio() {
   kubectl wait --for=condition=Ready pods --all -n istio-system
 
   # Can be disabled for some cases
-
   echo "Installing Istio Gateway..."
-  helm install istio-ingress istio/gateway -n istio-ingress --create-namespace --wait \
+  helm install istio-ingress istio/gateway -n istio-ingress --create-namespace --wait --version 1.22.0 \
     --set defaults.tolerations[0].key=type \
     --set-string defaults.tolerations[0].value=service-mesh \
     --set defaults.tolerations[0].operator=Equal \
@@ -175,14 +213,19 @@ linkerd() {
 }
 
 # Define list of arguments expected in the input
-optstring="icl"
+optstring="ascl"
 
 # Get the options (arguments)
 while getopts "$optstring" arg; do
   case $arg in
-  i)
+  a)
     prerequisites
-    istio
+    istio_ambient
+    exit 0
+    ;;
+  s)
+    prerequisites
+    istio_sidecar
     exit 0
     ;;
   c)

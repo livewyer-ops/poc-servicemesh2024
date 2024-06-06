@@ -5,10 +5,6 @@ metadata:
   namespace: default
 spec:
   template:
-    # Istio annotation
-    #metadata:
-    #  annotations:
-    #    proxy.istio.io/config: '{ "holdApplicationUntilProxyStarts": true }'
     spec:
       tolerations:
         - effect: NoSchedule

@@ -26,11 +26,9 @@ This exercise was performed using our internal development platform, LWDE (Livew
 
 - [Design Document](docs/design-document.md)
 - [Operational Manual](docs/operational-manual.md)
-
 - Test Reports:
   - [Test Report - Istio vs Linkerd vs Cilium](docs/test-report.md)
   - [Test Report - Istio Ambient vs Istio Sidecar](docs/test-report-istio.md)
-
 - Blog Posts:
   - [Service Meshes Decoded: a performance comparison of Istio vs Linkerd vs Cilium](https://livewyer.io/blog/2024/05/08/comparison-of-service-meshes)
   - [Service Meshes Decoded Part Two: Is Istio Ambient worth it?](https://livewyer.io/blog/2024/06/06/comparison-of-service-meshes-part-two)

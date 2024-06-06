@@ -2,7 +2,9 @@
 
 This directory presents the results of Network and Performance tests.
 
-The Test Results titled V3 were used as the final version to produce our Test Report.
+The Test Results titled V3 were used as the final version to produce our [initial Test Report](./../docs/test-report.md).
+
+The Test Results titled V4 and V5 were used to produce our [Test Report - Istio Ambient vs Istio Sidecar](./../docs/test-report-istio.md).
 
 ## Structure
 

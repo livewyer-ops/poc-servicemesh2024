@@ -673,21 +673,21 @@ The data below includes only resource usage of the `ztunnel` DaemonSet pod on a 
 
 </details>
 
-**Summary**
-
-Based on the tables above, we can conclude that Istio Ambient consumes less resources than Istio Sidecar at all scales. This result is expected because the resources required by Istio Sidecar increase with the number of sidecar enabled pods. More pods, more sidecars, more resources needed. In contrast, Istio Ambient mitigates this by using a new decoupled design, so the resource requirement per node remains relatively constant regardless of the number of pods.
-
-For the `bookinfo` app with `1` replica, the difference in CPU and memory usage is approximately `28%` and `160%` respectively. However, for the `bookinfo` app with `8` replicas, the difference in CPU and memory usage is about `46%` and `175%` respectively.
+Based on the tables above, for the `bookinfo` app with `1` replica, the difference in CPU and memory usage is approximately `28%` and `160%` respectively. However, for the `bookinfo` app with `8` replicas, the difference in CPU and memory usage is about `46%` and `175%` respectively.
 
 ## Conclusion
 
-For a single pod, Istio Ambient consumes nearly the same amount of CPU but almost four times less memory compared to Istio Sidecar. As the number of pods increases, the difference in resource utilisation becomes more significant, as illustrated in the graphs below:
+Istio Ambient consumes less resources than Istio Sidecar at all scales. This result is expected because the resources required by Istio Sidecar increase with the number of sidecar enabled pods. More pods, more sidecars, more resources needed. In contrast, Istio Ambient mitigates this by using a new decoupled design, so the resource requirement per node remains relatively constant regardless of the number of pods.
+
+For an unrealistic scenario with a single pod, Istio Ambient consumes nearly the same amount of CPU but almost four times less memory compared to Istio Sidecar. As the number of pods increases, the difference in resource utilisation becomes more significant, as illustrated in the graphs below:
 
 | ![](./../network-tests/v5/diagrams/comparison-diagrams/test-app-8-replicas-cpu.png) | ![](./../network-tests/v5/diagrams/comparison-diagrams/test-app-8-replicas-memory.png) |
 | ----------------------- | -------------------------- |
 
 In summary, Istio Ambient is a great product, which is definitely faster and more performative than Istio Sidecar.
-Leveraging the strengths of Istio Sidecar, Istio Ambient effectively addresses performance and resource overhead issues and becomes a strong contender to all products from our service mesh comparison. However, the tested Istio Ambient is still in the beta phase, indicating that frequent changes, fixes and releases may occur. Implementing it prior to its general availability could result in additional maintenance overhead.
+Leveraging the strengths of Istio Sidecar, Istio Ambient effectively addresses performance and resource overhead issues and becomes a strong contender to all products from our service mesh comparison.
+
+For any platform currently using Istio Sidecar, by implementing Istio Ambient instead, you will take advantage of the improved resource utilisation resulting in a **significant reduction in cloud expenditure**.  However, the tested Istio Ambient is still in the beta phase, indicating that frequent changes, fixes and releases may occur. Implementing it prior to its general availability could result in additional maintenance overhead.
 
 Going back to the original purpose of this summary, we are unable to recommend a specific product, but we can provide an updated table of requirements, that may help you choose the right mesh.
 

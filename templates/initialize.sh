@@ -20,6 +20,7 @@ initialize() {
   
   aws eks update-kubeconfig --name "$CLUSTER_NAME"_"$CLUSTER_NAME"-control-plane
 
+  # ONLY FOR CILIUM 
   # Patch AWS Node DS
   # echo "Patching aws-node daemonset..."
   # kubectl -n kube-system patch daemonset aws-node --type='strategic' -p='{"spec":{"template":{"spec":{"nodeSelector":{"io.cilium/aws-node-enabled":"true"}}}}}'

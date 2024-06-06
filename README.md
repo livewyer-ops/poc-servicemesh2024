@@ -8,9 +8,9 @@
 
 <h1 align="center">A full comparison of three service mesh solutions</h1>
 
-This repository serves as the central storage for all the codebase and documentation related to Service Mesh / eBPF Product Comparison POC.
+This repository serves as the central storage for all the codebase and documentation related to Service Mesh / eBPF Product Comparison.
 
-The purpose of this POC was to provide a reliable comparison of three available service mesh options to determine the best. We aimed to compare three popular open-source service meshes—Cilium, Istio, and Linkerd—and share our experience.
+The purpose of this study was to provide a reliable comparison of three available service mesh options to determine the best. We aimed to compare and share our experience on three popular open-source service meshes: Cilium, Linkerd and Istio (Sidecar and Ambient).
 This comparison covers the following areas:
 
 - Deployment
@@ -26,8 +26,14 @@ This exercise was performed using our internal development platform, LWDE (Livew
 
 - [Design Document](docs/design-document.md)
 - [Operational Manual](docs/operational-manual.md)
-- [Test Report](docs/test-report.md)
-- [Blog Post](https://livewyer.io/blog/2024/05/08/comparison-of-service-meshes)
+
+- Test Reports:
+  - [Test Report - Istio vs Linkerd vs Cilium](docs/test-report.md)
+  - [Test Report - Istio Ambient vs Istio Sidecar](docs/test-report-istio.md)
+
+- Blog Posts:
+  - [Service Meshes Decoded: a performance comparison of Istio vs Linkerd vs Cilium](https://livewyer.io/blog/2024/05/08/comparison-of-service-meshes)
+  - [Service Meshes Decoded Part Two: Is Istio Ambient worth it?](https://livewyer.io/blog/2024/06/06/comparison-of-service-meshes-part-two)
 
 ## :warning: Disclaimer
 

@@ -352,7 +352,7 @@ For more information on the prerequisites and maintenance of the Istio Ambient, 
 
 **Product Integration**
 
-To use Istio, you will need to install four helm charts. If you require an ingress controller, you can also install one more. Istio offers support for various ingress resources such as Ingress, Gateway API, and Istio Gateway, which simplifies the process of implementing a service mesh. To summarise, you need to install five Helm charts to introduce Istio to your cluster. After that, you can start meshing your services.
+To use Istio Ambient, you will need to install four helm charts. If you require an ingress controller, you can also install one more. Istio offers support for various ingress resources such as Ingress, Gateway API, and Istio Gateway, which simplifies the process of implementing a service mesh. To summarise, you need to install five Helm charts to introduce Istio to your cluster. After that, you can start meshing your services.
 
 **Product Usability**
 
@@ -374,7 +374,7 @@ It's important to know how often you need to upgrade your software, so below you
 
 **Summary**
 
-If you require a service mesh solution, Istio Ambient is a reliable option. It has all benefits of Istio Sidecar and additionally provides you with better performance and lower resource usage. However, it's worth noting that Istio Ambient, in comparison to Istio Sidecar, requires the installation of 2 additional helm charts, which will impact your operations during upgrades.
+If you require a service mesh solution, Istio Ambient is a reliable option. It has all benefits of Istio Sidecar and additionally provides you with better performance and lower resource usage. However, it's important to note that Istio Ambient is still in beta, which could impact your operations due to frequent changes and upgrades.
 
 ### Compliance
 
@@ -677,7 +677,7 @@ The data below includes only resource usage of the `ztunnel` DaemonSet pod on a 
 
 **Summary**
 
-Based on the tables above, we can conclude that Istio Ambient consumes less resources than Istio Sidecar at all scales.
+Based on the tables above, we can conclude that Istio Ambient consumes less resources than Istio Sidecar at all scales. This result is expected because the resources required by Istio Sidecar increase with the number of sidecar enabled pods. More pods, more sidecars, more resources needed. In contrast, Istio Ambient mitigates this by using a new decoupled design, so the resource requirement per node remains relatively constant regardless of the number of pods.
 
 For the `bookinfo` app with `1` replica, the difference in CPU and memory usage is approximately `28%` and `160%` respectively. However, for the `bookinfo` app with `8` replicas, the difference in CPU and memory usage is about `46%` and `175%` respectively.
 
@@ -689,9 +689,7 @@ For a single pod, Istio Ambient consumes nearly the same amount of CPU but almos
 | ----------------------- | -------------------------- |
 
 In summary, Istio Ambient is a great product, which is definitely faster and more performative than Istio Sidecar.
-Leveraging the strengths of Istio Sidecar, Istio Ambient effectively addresses performance and resource overhead issues and becomes a strong contender to all products from our service mesh comparison. However, it introduces operational complexity by using 2 additional helm charts and currently being in beta status, potentially impacting the upgrade cycle of your teams.
-
-
+Leveraging the strengths of Istio Sidecar, Istio Ambient effectively addresses performance and resource overhead issues and becomes a strong contender to all products from our service mesh comparison. However, the tested Istio Ambient is still in the beta phase, indicating that frequent changes, fixes and releases may occur. Implementing it prior to its general availability could result in additional maintenance overhead.
 
 Going back to the original purpose of this summary, we are unable to recommend a specific product, but we can provide an updated table of requirements, that may help you choose the right mesh.
 

@@ -1,0 +1,48 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: pandoc-{{repo_name}}
+  annotations:
+    pipelinesascode.tekton.dev/on-cel-expression: |
+      ( event == "pull_request" || ( event == "push" && source_branch == "main") ) && body.sender.login != "lw-tkn[bot]"
+    pipelinesascode.tekton.dev/on-target-branch: "[main]"
+    pipelinesascode.tekton.dev/pipeline: "[.tekton/pandoc-pipeline.yaml]"
+    pipelinesascode.tekton.dev/task: "[.tekton/pandoc-task.yaml]"
+
+spec:
+  pipelineRef:
+    name: pandoc
+
+  params:
+    - name: debug
+      value: "1"
+    - name: url
+      value: "{{repo_url}}"
+    - name: revision
+      value: "{{revision}}"
+    - name: targetBranch
+      value: "{{target_branch}}"
+    - name: fileName
+      value: "README.md"
+    - name: scriptPath
+      value: "/data/pandoc/cli.sh"
+      #value: "/bin/sh"
+
+  workspaces:
+    - name: basic-auth
+      secret:
+        secretName: "{{git_auth_secret}}"
+    - name: source
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 128Mi
+
+  taskRunTemplate:
+    serviceAccountName: pipelines-as-code-runner
+    podTemplate:
+      securityContext:
+        fsGroup: 65532

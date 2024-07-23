@@ -1,0 +1,96 @@
+---
+# Source: tkn-catalog/templates/tasks/pandoc.yaml
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: pandoc
+  labels:
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: tkn-catalog
+    app.kubernetes.io/version: v0.56.1
+    helm.sh/chart: tkn-catalog-0.4.5
+  annotations:
+    tekton.dev/pipelines.minVersion: 0.51.0
+    tekton.dev/platforms: linux/amd64
+    tekton.dev/categories: Pandoc
+    tekton.dev/tags: markdown,pandoc,pdf
+spec:
+  displayName: Pandoc
+  description: Combine and/or converts markdown files to PDF
+
+  workspaces:
+    - name: source
+      description: The location of single markdown files for conversion
+
+  params:
+    - name: debug
+      description: Output debugging information CUSTOM TASK IS USED
+      type: string
+      default: ""
+    - name: concatenate
+      description: Whether to enable the concatenate function to produce PDF
+      type: string
+      default: "1"
+    - name: concatenateDir
+      description: The directory in which to look for md to coombine and convert
+      type: string
+      default: input/manuals
+    - name: singleConvert
+      description: Whether to convert single markdown files to PDF
+      type: string
+      default: "1"
+    - name: singleMdDir
+      description: The directory in which to look for single md files to convert
+      type: string
+      default: input/docs
+    - name: configPath
+      description: The config path for pandoc, this includes fonts
+      type: string
+      default: /data/pandoc
+    - name: outputPath
+      description: The output path for pandoc
+      type: string
+      default: output
+    - name: scriptPath
+      description: The path to run the script for pandoc
+      type: string
+      default: /data/pandoc/cli.sh
+
+  # results:
+  #  - name: output
+  #    description: Holds the Tasks's output
+  #  - name: error
+  #    description: Holds the Tasks's errors
+
+  steps:
+    - name: pandoc-run
+      workingDir: $(workspaces.source.path)
+      image: us-central1-docker.pkg.dev/mgmt-wyer-live/livewyer-container-registry/pandoc:5e776e8
+      env:
+        # TODO Be careful with env variables, variables below should have the same names as variables here https://github.com/livewyer-ops/containers-private/pull/30/files#diff-bf0f3a66cff7be1b14f77a225bf15b2cf2c51382ed35512dda56c388ad8f7bf3:~:text=output_path%3D%22%24%7B-,output_path,-%3A%2D%22/mnt
+        # Make sure variable names are the same and are not confusing
+        - name: PANDOC_MULTIPLE
+          value: $(params.concatenate)
+        - name: PANDOC_MULTI_PATH
+          value: "$(workspaces.source.path)/$(params.concatenateDir)"
+        - name: PANDOC_SINGLE
+          value: $(params.singleConvert)
+        - name: PANDOC_SINGLE_PATH
+          value: "$(workspaces.source.path)/$(params.singleMdDir)"
+        - name: PANDOC_VERBOSE
+          value: $(params.debug)
+        - name: PANDOC_CONF_PATH
+          value: $(params.configPath)
+        - name: PANDOC_OUTPUT_PATH
+          value: "$(workspaces.source.path)/$(params.outputPath)"
+      # TODO use correct user (mkdir: can't create directory '/mnt/output': Permission denied)
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 0
+      #stdoutConfig:
+        #path: $(results.output.path)
+      #stderrConfig:
+        #path: $(results.error.path)
+      args:
+        - $(params.scriptPath)

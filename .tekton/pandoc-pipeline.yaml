@@ -1,0 +1,171 @@
+---
+# Source: tkn-catalog/templates/pipelines/pandoc.yaml
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: pandoc
+  labels:
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: tkn-catalog
+    app.kubernetes.io/version: v0.56.1
+    helm.sh/chart: tkn-catalog-0.4.5
+  annotations:
+    tekton.dev/pipelines.minVersion: 0.51.0
+    tekton.dev/platforms: linux/amd64
+    tekton.dev/categories: Pandoc
+    tekton.dev/tags: markdown,pandoc,pdf
+spec:
+  displayName: Pandoc
+  description: Combine and/or converts markdown files to PDF
+
+  workspaces:
+    - name: source
+      description: Holds the cloned Git repository
+
+    - name: basic-auth
+      description: |
+        A Workspace containing a .gitconfig and .git-credentials file.
+
+        These will be copied to the user's home before any git commands are run.
+        Any other files in this Workspace are ignored.
+
+  params:
+    - name: debug
+      description: Output debugging information CUSTOM
+      type: string
+      default: "true"
+    - name: url
+      description: Git repository URL to clone
+      type: string
+    - name: revision
+      description: Git revision to checkout
+      type: string
+    - name: targetBranch
+      description: The branch name on which the event targets (same as source_branch for push events)
+      type: string
+      default: "main"
+    - name: fileName
+      description: Identify the principal file in the repository. For example 'Chart.yaml', 'Dockerfile', 'main.tf'.
+      type: string
+      default: "README.md"
+
+    - name: concatenate
+      description: Whether to enable the concatenate function to produce PDF
+      type: string
+      default: "true"
+    - name: concatenateDir
+      description: The directory in which to look for md to coombine and convert
+      type: string
+      default: input/manuals
+    - name: singleConvert
+      description: Whether to convert single markdown files to PDF
+      type: string
+      default: "true"
+    - name: singleMdDir
+      description: The directory in which to look for single md files to convert
+      type: string
+      default: input/docs
+    - name: configPath
+      description: The config path for pandoc, this includes fonts
+      type: string
+      default: /data/pandoc
+    - name: outputPath
+      description: The output path for pandoc
+      type: string
+      default: output
+    - name: scriptPath
+      description: The path to run the script for pandoc
+      type: string
+      default: /data/pandoc/cli.sh
+
+    - name: gitDestinationBranch
+      type: string
+      description: The git branch to commit and push the output to
+      default: "pandoc-pipeline"
+
+  tasks:
+    - name: git-clone
+      taskRef:
+        resolver: cluster
+        params:
+          - name: name
+            value: git-clone
+      params:
+        - name: debug
+          value: $(params.debug)
+        - name: url
+          value: $(params.url)
+        - name: revision
+          value: $(params.revision)
+        - name: targetBranch
+          value: $(params.targetBranch)
+        - name: fileName
+          value: $(params.fileName)
+      workspaces:
+        - name: basic-auth
+          workspace: basic-auth
+        - name: source
+
+    - name: pandoc
+      runAfter: ["git-clone"]
+      #TODO use cluster resolver
+      taskRef:
+        name: pandoc
+      params:
+        - name: debug
+          value: $(params.debug)
+        - name: concatenate
+          value: $(params.concatenate)
+        - name: concatenateDir
+          value: $(params.concatenateDir)
+        - name: singleConvert
+          value: $(params.singleConvert)
+        - name: singleMdDir
+          value: $(params.singleMdDir)
+        - name: scriptPath
+          value: $(params.scriptPath)
+        - name: outputPath
+          value: $(params.outputPath)
+        - name: configPath
+          value: $(params.configPath)
+        - name: gitDestinationBranch
+          value: $(params.gitDestinationBranch)
+      workspaces:
+        - name: source
+          workspace: source
+
+    - name: git-push
+      runAfter: ["pandoc"]
+      taskRef:
+        resolver: cluster
+        params:
+          - name: name
+            value: git-cli
+      params:
+        - name: debug
+          value: $(params.debug)
+        - name: gitDestinationBranch
+          value: $(params.gitDestinationBranch)
+        # If branch does not exist, create and checkout new branch
+        # Add all files and commit changes
+        # Push the branch to the repository
+        # TODO Use correct results paths
+        # ERROR message: 'failed to create task run pod "pandoc-oleksandr-tkn-catalog-tests-jhg7f-git-push": non-existent variable
+        # TODO be careful with comments and empty lines
+        #tekton/scripts/script-0-q47bp: line 71: $'\n\n# Return exit code\nRESULT_SHA="$(git rev-parse HEAD | tr -d n)"\nEXIT_CODE="$?"\nif [ "${EXIT_CODE}" != 0 ]; then\n  exit "${EXIT_CODE}"\nfi\n\n# Make sure we dont': command not found
+        - name: gitScript
+          value: |
+            if ! git show-ref --verify --quiet refs/heads/$(params.gitDestinationBranch); then
+              git checkout -b $(params.gitDestinationBranch)
+            else
+              git checkout $(params.gitDestinationBranch)
+            fi
+            git add .
+            git commit -m "Pandoc conversion" || echo "No changes to commit"
+            git push origin $(params.gitDestinationBranch) || echo "No changes to push"
+      workspaces:
+        - name: basic-auth
+          workspace: basic-auth
+        - name: source
+          workspace: source
